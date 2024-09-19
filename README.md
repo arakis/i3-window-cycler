@@ -1,11 +1,12 @@
 # i3 Window Cycler
 
-An advanced window cycling tool for the [i3 window manager](https://i3wm.org/), providing an intuitive way to switch between windows based on their recent usage, mimicking the Alt+Tab functionality found in other desktop environments.
+A lightweight window cycling utility for the [i3 window manager](https://i3wm.org/), enabling you to switch between windows based on their recent usage without a visual popup. It mimics the Alt+Tab functionality found in other desktop environments by cycling window focus in a most-recently-used (MRU) order.
 
 ## Features
 
-- **Most Recently Used (MRU) Window Switching**: Cycle through windows based on the order of recent focus.
-- **Forward and Backward Cycling**: Navigate through the window list in both directions.
+- **MRU Window Switching**: Cycle through windows based on the order of recent focus.
+- **Forward and Backward Navigation**: Move through the window list in both directions.
+- **Seamless Cycling**: Provides visual feedback by focusing windows as you cycle, without a popup window.
 - **Cycling Cancellation**: Cancel the cycling operation to return to the initially focused window.
 - **Automatic List Management**: The MRU list updates automatically when windows are opened, closed, or focused.
 - **Daemon Mode**: Runs as a background process to listen for cycling commands.
@@ -33,7 +34,7 @@ An advanced window cycling tool for the [i3 window manager](https://i3wm.org/), 
    ```
 2. **Make Scripts Executable**:
    ```bash
-   chmod +x ~/.config/i3/i3-window-cycler/i3-window-cycler.py ~/.config/i3/i3-window-cycler/i3-grab-key.py
+   chmod +x ~/.config/i3/i3-window-cycler/i3-window-cycler.py ~/.config/i3/i3-window-cycler/i3-key-listener.py
    ```
 
 ### Configuration
@@ -48,19 +49,19 @@ An advanced window cycling tool for the [i3 window manager](https://i3wm.org/), 
 
 2. **Set Up Key Monitoring**:
 
-   The [`i3-grab-key.py`](i3-grab-key.py) script monitors key events to detect when a modifier key (like Alt) is released, allowing the cycler to finish cycling. It requires root privileges or appropriate permissions to read input devices.
+   The [`i3-key-listener.py`](i3-key-listener.py) script monitors key events to detect when a modifier key (like Alt) is released, allowing the cycler to finish cycling. It requires root privileges or appropriate permissions to read input devices.
 
    **Option 1: Run with sudo**
 
    Add the following line to your i3 config:
 
    ```
-   exec --no-startup-id sudo ~/.config/i3/i3-window-cycler/i3-grab-key.py --keycode 56
+   exec --no-startup-id sudo ~/.config/i3/i3-window-cycler/i3-key-listener.py --keycode 56
    ```
 
    **Option 2: Configure udev Rules**
 
-   If you prefer not to run `i3-grab-key.py` with sudo, set up udev rules to grant your user access to input devices. See the `4. Ensure Proper Permissions` section below.
+   If you prefer not to run `i3-key-listener.py` with sudo, set up udev rules to grant your user access to input devices. See the `4. Ensure Proper Permissions` section below.
 
    Replace `56` with the keycode of your modifier key if different (e.g., `56` for Left Alt, `125` for Left Super/Windows key).
 
@@ -91,7 +92,7 @@ An advanced window cycling tool for the [i3 window manager](https://i3wm.org/), 
        bindsym Escape exec --no-startup-id ~/.config/i3/i3-window-cycler/i3-window-cycler.py --command cancel; mode "default"
 
        # Finish cycling when Alt is released (not supported by i3)
-       # Using the i3-grab-key.py script instead
+       # Using the i3-key-listener.py script instead
        # bindsym --release $alt exec --no-startup-id ~/.config/i3/i3-window-cycler/i3-window-cycler.py --command finish; mode "default"
    }
    ```
@@ -100,7 +101,7 @@ An advanced window cycling tool for the [i3 window manager](https://i3wm.org/), 
 
 4. **Ensure Proper Permissions**:
 
-   To run `i3-grab-key.py` without `sudo`, you can set up udev rules to grant your user access to input devices.
+   To run `i3-key-listener.py` without `sudo`, you can set up udev rules to grant your user access to input devices.
 
    **Create udev Rule**:
 
@@ -115,7 +116,7 @@ An advanced window cycling tool for the [i3 window manager](https://i3wm.org/), 
    Ensure the following line to your i3 config:
 
    ```
-   exec --no-startup-id ~/.config/i3/i3-window-cycler/i3-grab-key.py --keycode 56
+   exec --no-startup-id ~/.config/i3/i3-window-cycler/i3-key-listener.py --keycode 56
    ```
 
    **Reload udev Rules**:
