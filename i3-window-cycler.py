@@ -19,6 +19,7 @@ class FocusCycler:
     def __init__(self):
         self.i3 = None
         self.window_list = []  # Store dicts with 'id' and 'title'
+        self.current_focused_window = None  # New attribute to store the focused window
         self.initial_window = None
         self.current_index = -1
         self.is_cycling = False
@@ -37,20 +38,24 @@ class FocusCycler:
         tree = await self.i3.get_tree()
         focused = tree.find_focused()
         if focused and focused.type == 'con':
-            self.window_list = [
-                {'id': focused.id, 'title': focused.name or 'No Title'}
-            ]
+            self.current_focused_window = {'id': focused.id, 'title': focused.name or 'No Title'}
+            self.window_list = [self.current_focused_window]
         else:
+            self.current_focused_window = None
             self.window_list = []
         logging.debug('Initialized window_list:\n' + await self.get_window_list_info())
 
     async def on_window_focus(self, i3conn, event):
-        if self.ignore_focus_events:
-            logging.debug('Ignoring focus event')
-            return
         window_id = event.container.id
         window_title = event.container.name or 'No Title'
         logging.debug(f'Window focused: {window_id}')
+
+        # Always update the current focused window
+        self.current_focused_window = {'id': window_id, 'title': window_title}
+
+        if self.ignore_focus_events:
+            logging.debug('Ignoring focus event for window list update')
+            return
 
         # Remove window from list if it exists
         self.window_list = [w for w in self.window_list if w['id'] != window_id]
@@ -141,7 +146,7 @@ class FocusCycler:
             self.is_cycling = False
             self.ignore_focus_events = False
             # Update MRU list now that cycling is finished
-            focused = self.window_list[self.current_index] if self.window_list else None
+            focused = self.current_focused_window
             if focused:
                 window_id = focused['id']
                 # Move the focused window to the front
@@ -198,6 +203,13 @@ async def send_command(command):
         await writer.wait_closed()
     except Exception as e:
         print(f'Failed to send command: {e}')
+        if not os.path.exists(SOCKET_FILE):
+            print(f"Socket file not found at {SOCKET_FILE}. Is the i3-window-cycler daemon running? Start with i3-window-cycler.py --daemon")
+            return
+        elif isinstance(e, ConnectionRefusedError):
+            print(f"Is the i3-window-cycler daemon running? Start with i3-window-cycler.py --daemon")
+            return
+
 
 async def main():
     parser = argparse.ArgumentParser(description='i3-cycle-focus without saving state to disk.')

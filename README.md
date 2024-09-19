@@ -88,7 +88,6 @@ Key features include:
    mode "window-cycler" {
        # Cycle forward with Alt+Tab
        bindsym $alt+Tab exec --no-startup-id ~/.config/i3/i3-window-cycler/i3-window-cycler.py --command next
-       bindsym $alt+d exec --no-startup-id ~/.config/i3/i3-window-cycler/i3-window-cycler.py --command $alt
 
        # Cycle backward with Alt+Shift+Tab
        bindsym $alt+Shift+Tab exec --no-startup-id ~/.config/i3/i3-window-cycler/i3-window-cycler.py --command prev
@@ -103,6 +102,8 @@ Key features include:
        #bindsym --release $alt exec --no-startup-id ~/.config/i3/i3-window-cycler/i3-window-cycler.py --command finish; mode "default"
    }
    ```
+
+   Feel free to experiment with different keybinding setups, including advanced keyboard navigation techniques. Since the cycler picks up the latest focused window when you release the Alt key, you can tailor the keybindings to suit your workflow and preferences.
 
 4. **Ensure Proper Permissions**:
 
