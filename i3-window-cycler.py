@@ -48,10 +48,17 @@ class FocusCycler:
     async def on_window_focus(self, i3conn, event):
         window_id = event.container.id
         window_title = event.container.name or 'No Title'
+        floating = event.container.floating
+        window_marks = event.container.marks  # List of window marks/tags
         logging.debug(f'Window focused: {window_id}')
 
-        # Always update the current focused window
-        self.current_focused_window = {'id': window_id, 'title': window_title}
+        # Always update the current focused window with additional properties
+        self.current_focused_window = {
+            'id': window_id,
+            'title': window_title,
+            'floating': floating,
+            'marks': window_marks,
+        }
 
         if self.ignore_focus_events:
             logging.debug('Ignoring focus event for window list update')
@@ -60,7 +67,7 @@ class FocusCycler:
         # Remove window from list if it exists
         self.window_list = [w for w in self.window_list if w['id'] != window_id]
         # Insert at the front
-        self.window_list.insert(0, {'id': window_id, 'title': window_title})
+        self.window_list.insert(0, self.current_focused_window)
         if len(self.window_list) > MAX_WIN_HISTORY:
             self.window_list = self.window_list[:MAX_WIN_HISTORY]
         logging.debug('Updated window_list:\n' + await self.get_window_list_info())
@@ -75,9 +82,17 @@ class FocusCycler:
     async def on_window_new(self, i3conn, event):
         window_id = event.container.id
         window_title = event.container.name or 'No Title'
+        floating = event.container.floating
+        window_marks = event.container.marks
         logging.debug(f'New window opened: {window_id}')
-        # Insert new window at the frontwindow-cycler
-        self.window_list.insert(0, {'id': window_id, 'title': window_title})
+        # Insert new window at the front
+        new_window = {
+            'id': window_id,
+            'title': window_title,
+            'floating': floating,
+            'marks': window_marks,
+        }
+        self.window_list.insert(0, new_window)
         if len(self.window_list) > MAX_WIN_HISTORY:
             self.window_list = self.window_list[:MAX_WIN_HISTORY]
         logging.debug('Updated window_list:\n' + await self.get_window_list_info())
@@ -102,10 +117,25 @@ class FocusCycler:
         logging.debug(f'Initial window: {self.initial_window}')
         logging.debug('Window list at start:\n' + await self.get_window_list_info())
 
+    # Add a new method to check and handle the current window
+    async def check_and_handle_current_window(self):
+        window = self.current_focused_window
+        if window:
+            is_floating = window.get('floating') in ('user_on', 'on', 'auto_on')
+            has_scratchpad_mark = 'scratchpad' in window.get('marks', [])
+            if is_floating and has_scratchpad_mark:
+                window_id = window['id']
+                # Send the window to scratchpad
+                await self.i3.command(f'[con_id={window_id}] move to scratchpad')
+                logging.debug(f'Window {window_id} sent to scratchpad')
+
     async def cycle_next(self):
         if not self.is_cycling:
             logging.debug('Cycling not started, starting now')
             await self.start_cycling()
+
+        # Before moving to the next window, check and handle the current window
+        await self.check_and_handle_current_window()
 
         self.current_index += 1
         if self.current_index >= len(self.window_list):
@@ -121,6 +151,9 @@ class FocusCycler:
         if not self.is_cycling:
             logging.debug('Cycling not started, starting now')
             await self.start_cycling()
+
+        # Before moving to the previous window, check and handle the current window
+        await self.check_and_handle_current_window()
 
         self.current_index -= 1
         if self.current_index < 0:
