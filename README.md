@@ -97,7 +97,7 @@ A lightweight window cycling utility for the [i3 window manager](https://i3wm.or
    }
    ```
 
-   Feel free to customize the keybindings to suit your workflow. Since the cycler picks up the latest focused window when you release the Alt key, you can tailor the keybindings to your preferences.
+   Feel free to customize the keybindings to suit your workflow. Since the cycler picks up the latest focused window when you release the Alt key, you can tailor the keybindings to your preferences, for example changing focus via arrow keys. So you could combine alt-tab with classic window focus navigation.
 
 4. **Ensure Proper Permissions**:
 
