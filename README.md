@@ -60,7 +60,7 @@ An advanced window cycling tool for the [i3 window manager](https://i3wm.org/), 
 
    **Option 2: Configure udev Rules**
 
-   If you prefer not to run `i3-grab-key.py` with sudo, set up udev rules to grant your user access to input devices. See the [Ensure Proper Permissions](#ensure-proper-permissions) section below.
+   If you prefer not to run `i3-grab-key.py` with sudo, set up udev rules to grant your user access to input devices. See the `4. Ensure Proper Permissions` section below.
 
    Replace `56` with the keycode of your modifier key if different (e.g., `56` for Left Alt, `125` for Left Super/Windows key).
 
@@ -95,8 +95,6 @@ An advanced window cycling tool for the [i3 window manager](https://i3wm.org/), 
        # bindsym --release $alt exec --no-startup-id ~/.config/i3/i3-window-cycler/i3-window-cycler.py --command finish; mode "default"
    }
    ```
-
-   Replace `<your-username>` with your actual GitHub username if you haven’t already.
 
    Feel free to customize the keybindings to suit your workflow. Since the cycler picks up the latest focused window when you release the Alt key, you can tailor the keybindings to your preferences.
 
