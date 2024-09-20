@@ -24,8 +24,6 @@ A lightweight window cycling utility for the [i3 window manager](https://i3wm.or
   ```bash
   pip install evdev
   ```
-- **i3 Window Manager**: This tool is designed to work with the i3 window manager.
-
 ### Installation
 
 1. **Clone the Repository**:
