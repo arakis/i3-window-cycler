@@ -49,7 +49,6 @@ async def monitor_key_events(execute_path, keycode, print_all_keys):
                 subprocess.run([execute_path, "--command", "start"])
 
             if event.code == keycode and event.value == 0:
-                subprocess.run(["i3-msg", "mode", "default"])
                 subprocess.run([execute_path, "--command", "finish"])
 
 async def main():

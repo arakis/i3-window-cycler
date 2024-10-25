@@ -7,6 +7,7 @@ import os
 import sys
 import argparse
 import logging
+import subprocess
 from i3ipc.aio import Connection
 
 SOCKET_FILE = '/tmp/.i3-window-cycler.sock'
@@ -24,12 +25,14 @@ class FocusCycler:
         self.current_index = -1
         self.is_cycling = False
         self.ignore_focus_events = False
+        self.current_mode = "default"  # Initialize the current mode
 
     async def connect(self):
         self.i3 = await Connection(auto_reconnect=True).connect()
         self.i3.on('window::focus', self.on_window_focus)
         self.i3.on('window::close', self.on_window_close)
         self.i3.on('window::new', self.on_window_new)
+        self.i3.on('mode', self.on_mode_change)  # Subscribe to mode change events
         self.i3.on('shutdown', self.on_shutdown)
         await self.initialize_window_list()
 
@@ -182,6 +185,7 @@ class FocusCycler:
             logging.debug('Cycling finished')
             self.is_cycling = False
             self.ignore_focus_events = False
+
             # Update MRU list now that cycling is finished
             focused = self.current_focused_window
             if focused:
@@ -191,6 +195,10 @@ class FocusCycler:
                 self.window_list.insert(0, focused)
                 if len(self.window_list) > MAX_WIN_HISTORY:
                     self.window_list = self.window_list[:MAX_WIN_HISTORY]
+
+            if self.current_mode == "window-cycler":
+                subprocess.run(["i3-msg", "mode", "default"])
+
             logging.debug('Window list at finish:\n' + await self.get_window_list_info())
 
     async def get_window_list_info(self):
@@ -232,6 +240,10 @@ class FocusCycler:
     async def run(self):
         await self.connect()
         await self.run_server()
+
+    async def on_mode_change(self, i3conn, event):
+        self.current_mode = event.change
+        logging.debug(f'Current mode changed to: {self.current_mode}')
 
 async def send_command(command):
     try:
@@ -318,3 +330,4 @@ For more information, visit: https://github.com/arakis/i3-window-cycler
 
 if __name__ == '__main__':
     asyncio.run(main())
+
