@@ -173,8 +173,12 @@ class FocusCycler:
             self.ignore_focus_events = False
             logging.debug('Window list after cancel:\n' + await self.get_window_list_info())
 
+    async def start(self):
+        self.ignore_focus_events = True
+        logging.debug('Start')
+
     async def finish_cycling(self):
-        if self.is_cycling:
+        if self.is_cycling or self.ignore_focus_events:
             logging.debug('Cycling finished')
             self.is_cycling = False
             self.ignore_focus_events = False
@@ -202,6 +206,8 @@ class FocusCycler:
             await self.cycle_prev()
         elif command == 'cancel':
             await self.cancel_cycling()
+        elif command == 'start':
+            await self.start()
         elif command == 'finish':
             await self.finish_cycling()
         else:
